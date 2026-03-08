@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediReminder - Medication Reminder App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #9ca3af;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            bottom: -2px;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-btn:hover {
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .medication-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .medication-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .med-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .med-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .med-dosage {
+            font-size: 0.9rem;
+            color: #667eea;
+            font-weight: 600;
+            background: #f0f4ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .med-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .med-detail {
+            color: #6b7280;
+        }
+        
+        .med-detail strong {
+            color: #1f2937;
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+        
+        .med-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+        
+        .btn-success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .btn-success:hover {
+            background: #bbf7d0;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: #1f2937;
+        }
+        
+        .intake-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .intake-item {
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .intake-info {
+            flex: 1;
+        }
+        
+        .intake-med {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .intake-time {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        
+        .intake-status {
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        
+        .status-taken {
+            color: #16a34a;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            color: #d97706;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-taken {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .badge-pending {
+            background: #fed7aa;
+            color: #d97706;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+        
+        .time-input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .time-input-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .time-input-item input {
+            padding: 8px !important;
+            font-size: 0.95rem;
+        }
+        
+        .time-input-item button {
+            padding: 8px 12px;
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .time-input-item button:hover {
+            background: #fecaca;
+        }
+        
+        .add-time-btn {
+            background: #dbeafe !important;
+            color: #0284c7 !important;
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px !important;
+            border-radius: 8px !important;
+        }
+        
+        .add-time-btn:hover {
+            background: #bfdbfe !important;
+        }
+        
+        .reminder-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #d97706;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification.success {
+            border-left: 4px solid #16a34a;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #dc2626;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #0284c7;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .med-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-pills"></i> MediReminder</h1>
+            <p>Track your medications and never miss a dose</p>
+        </div>
+        
+        <div class="glass-card" style="padding: 30px;">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
+                <button class="tab-btn" data-tab="medications">
+                    <i class="fas fa-prescription-bottle"></i> Medications
+                </button>
+                <button class="tab-btn" data-tab="today">
+                    <i class="fas fa-calendar-day"></i> Today's Reminders
+                </button>
+                <button class="tab-btn" data-tab="history">
+                    <i class="fas fa-history"></i> History
+                </button>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard">
+                <div class="grid-2">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;" id="totalMeds">0</div>
+                        <div style="opacity: 0.9;">Active Medications</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;" id="todayReminders">0</div>
+                        <div style="opacity: 0.9;">Today's Reminders</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;" id="completedToday">0</div>
+                        <div style="opacity: 0.9;">Completed Today</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;" id="adherenceRate">0%</div>
+                        <div style="opacity: 0.9;">Adherence Rate</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #1f2937; margin-bottom: 20px;">Upcoming Reminders</h2>
+                    <div id="upcomingReminders" class="intake-list"></div>
+                </div>
+            </div>
+            
+            <!-- Medications Tab -->
+            <div class="tab-content" id="medications">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="font-size: 1.3rem; font-weight: 700; color: #1f2937;">Your Medications</h2>
+                    <button class="btn btn-primary" id="addMedBtn">
+                        <i class="fas fa-plus"></i> Add Medication
+                    </button>
+                </div>
+                <div class="grid-2" id="medicationsList"></div>
+            </div>
+            
+            <!-- Today's Reminders Tab -->
+            <div class="tab-content" id="today">
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #1f2937; margin-bottom: 25px;">Today's Schedule</h2>
+                <div id="todaysList" class="intake-list"></div>
+            </div>
+            
+            <!-- History Tab -->
+            <div class="tab-content" id="history">
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #1f2937; margin-bottom: 25px;">Intake History</h2>
+                <div id="historyList" class="intake-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Medication Modal -->
+    <div class="modal" id="medModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalTitle">Add Medication</span>
+                <button class="close-btn" onclick="closeMedModal()">&times;</button>
+            </div>
+            
+            <form id="medForm">
+                <div class="form-group">
+                    <label for="medName">Medication Name *</label>
+                    <input type="text" id="medName" required placeholder="e.g., Aspirin, Metformin">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medDosage">Dosage *</label>
+                        <input type="text" id="medDosage" required placeholder="e.g., 500mg">
+                    </div>
+                    <div class="form-group">
+                        <label for="medFrequency">Frequency *</label>
+                        <select id="medFrequency" required>
+                            <option value="">Select frequency</option>
+                            <option value="once">Once daily</option>
+                            <option value="twice">Twice daily</option>
+                            <option value="thrice">Three times daily</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="medReason">Reason for Use</label>
+                    <textarea id="medReason" placeholder="e.g., For blood pressure, For pain relief"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Reminder Times *</label>
+                    <div class="time-input-group" id="timesContainer"></div>
+                    <button type="button" class="btn add-time-btn" onclick="addTimeInput()">
+                        <i class="fas fa-plus"></i> Add Time
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="medNotes">Additional Notes</label>
+                    <textarea id="medNotes" placeholder="e.g., Take with food, Do not combine with alcohol"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeMedModal()" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Medication</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- View Medication Details Modal -->
+    <div class="modal" id="viewMedModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="viewMedName"></span>
+                <button class="close-btn" onclick="closeViewMedModal()">&times;</button>
+            </div>
+            
+            <div id="viewMedDetails"></div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <button class="btn btn-secondary" onclick="closeViewMedModal()" style="flex: 1;">Close</button>
+                <button class="btn btn-primary" id="editMedBtn" style="flex: 1;">Edit</button>
+                <button class="btn btn-danger" id="deleteMedBtn" style="flex: 1;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const appState = {
+            medications: [],
+            intakeHistory: [],
+            currentEditId: null,
+        };
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            setupEventListeners();
+            renderDashboard();
+            renderMedications();
+            renderTodayReminders();
+            scheduleReminders();
+        });
+        
+        // Event Listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tab = e.currentTarget.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+            
+            // Add medication button
+            document.getElementById('addMedBtn').addEventListener('click', openAddMedModal);
+            
+            // Form submission
+            document.getElementById('medForm').addEventListener('submit', handleSaveMedication);
+            
+            // Edit and delete from view modal
+            document.getElementById('editMedBtn').addEventListener('click', editMedication);
+            document.getElementById('deleteMedBtn').addEventListener('click', deleteMedication);
+        }
+        
+        // Tab Management
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            if (tabName === 'history') {
+                renderHistory();
+            }
+        }
+        
+        // Medication Modal Functions
+        function openAddMedModal() {
+            appState.currentEditId = null;
+            document.getElementById('modalTitle').textContent = 'Add Medication';
+            document.getElementById('medForm').reset();
+            document.getElementById('timesContainer').innerHTML = '';
+            addTimeInput();
+            document.getElementById('medModal').classList.add('active');
+        }
+        
+        function closeMedModal() {
+            document.getElementById('medModal').classList.remove('active');
+            document.getElementById('medForm').reset();
+            document.getElementById('timesContainer').innerHTML = '';
+        }
+        
+        function closeViewMedModal() {
+            document.getElementById('viewMedModal').classList.remove('active');
+        }
+        
+        function addTimeInput() {
+            const container = document.getElementById('timesContainer');
+            const index = container.children.length;
+            const timeItem = document.createElement('div');
+            timeItem.className = 'time-input-item';
+            timeItem.innerHTML = `
+                <input type="time" class="reminder-time" value="09:00">
+                <button type="button" onclick="removeTimeInput(this)">Remove</button>
+            `;
+            container.appendChild(timeItem);
+        }
+        
+        function removeTimeInput(btn) {
+            btn.parentElement.remove();
+        }
+        
+        // Handle Save Medication
+        function handleSaveMedication(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('medName').value;
+            const dosage = document.getElementById('medDosage').value;
+            const frequency = document.getElementById('medFrequency').value;
+            const reason = document.getElementById('medReason').value;
+            const notes = document.getElementById('medNotes').value;
+            
+            const times = Array.from(document.querySelectorAll('.reminder-time'))
+                .map(input => input.value)
+                .filter(time => time);
+            
+            if (times.length === 0) {
+                showNotification('Please add at least one reminder time', 'error');
+                return;
+            }
+            
+            const medication = {
+                id: appState.currentEditId || Date.now(),
+                name,
+                dosage,
+                frequency,
+                reason,
+                notes,
+                times,
+                createdAt: appState.currentEditId ? 
+                    appState.medications.find(m => m.id === appState.currentEditId).createdAt :
+                    new Date().toISOString(),
+            };
+            
+            if (appState.currentEditId) {
+                const index = appState.medications.findIndex(m => m.id === appState.currentEditId);
+                appState.medications[index] = medication;
+                showNotification('Medication updated successfully', 'success');
+            } else {
+                appState.medications.push(medication);
+                showNotification('Medication added successfully', 'success');
+            }
+            
+            saveToStorage();
+            closeMedModal();
+            renderMedications();
+            renderDashboard();
+            renderTodayReminders();
+            scheduleReminders();
+        }
+        
+        // View Medication Details
+        function viewMedication(medId) {
+            const med = appState.medications.find(m => m.id === medId);
+            if (!med) return;
+            
+            appState.currentEditId = medId;
+            document.getElementById('viewMedName').textContent = med.name;
+            
+            const timesStr = med.times.join(', ');
+            document.getElementById('viewMedDetails').innerHTML = `
+                <div class="form-group">
+                    <label style="font-weight: 400; color: #6b7280;">Dosage</label>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #1f2937;">${med.dosage}</div>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: 400; color: #6b7280;">Frequency</label>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #1f2937;">${getFrequencyLabel(med.frequency)}</div>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: 400; color: #6b7280;">Reminder Times</label>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #1f2937;">${timesStr}</div>
+                </div>
+                ${med.reason ? `
+                <div class="form-group">
+                    <label style="font-weight: 400; color: #6b7280;">Reason for Use</label>
+                    <div style="color: #1f2937;">${med.reason}</div>
+                </div>
+                ` : ''}
+                ${med.notes ? `
+                <div class="form-group">
+                    <label style="font-weight: 400; color: #6b7280;">Notes</label>
+                    <div style="color: #1f2937;">${med.notes}</div>
+                </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('viewMedModal').classList.add('active');
+        }
+        
+        function editMedication() {
+            const med = appState.medications.find(m => m.id === appState.currentEditId);
+            if (!med) return;
+            
+            closeViewMedModal();
+            
+            document.getElementById('modalTitle').textContent = 'Edit Medication';
+            document.getElementById('medName').value = med.name;
+            document.getElementById('medDosage').value = med.dosage;
+            document.getElementById('medFrequency').value = med.frequency;
+            document.getElementById('medReason').value = med.reason;
+            document.getElementById('medNotes').value = med.notes;
+            
+            document.getElementById('timesContainer').innerHTML = '';
+            med.times.forEach(time => {
+                const timeItem = document.createElement('div');
+                timeItem.className = 'time-input-item';
+                timeItem.innerHTML = `
+                    <input type="time" class="reminder-time" value="${time}">
+                    <button type="button" onclick="removeTimeInput(this)">Remove</button>
+                `;
+                document.getElementById('timesContainer').appendChild(timeItem);
+            });
+            
+            document.getElementById('medModal').classList.add('active');
+        }
+        
+        function deleteMedication() {
+            if (confirm('Are you sure you want to delete this medication? This action cannot be undone.')) {
+                appState.medications = appState.medications.filter(m => m.id !== appState.currentEditId);
+                saveToStorage();
+                closeViewMedModal();
+                renderMedications();
+                renderDashboard();
+                renderTodayReminders();
+                showNotification('Medication deleted successfully', 'success');
+            }
+        }
+        
+        // Render Functions
+        function renderDashboard() {
+            const today = new Date().toDateString();
+            const todayIntakes = appState.intakeHistory.filter(intake => 
+                new Date(intake.timestamp).toDateString() === today
+            );
+            const completedToday = todayIntakes.filter(i => i.taken).length;
+            
+            document.getElementById('totalMeds').textContent = appState.medications.length;
+            document.getElementById('todayReminders').textContent = getTodayRemindersCount();
+            document.getElementById('completedToday').textContent = completedToday;
+            
+            const adherenceRate = getTodayRemindersCount() > 0 
+                ? Math.round((completedToday / getTodayRemindersCount()) * 100)
+                : 0;
+            document.getElementById('adherenceRate').textContent = adherenceRate + '%';
+            
+            renderUpcomingReminders();
+        }
+        
+        function renderMedications() {
+            const container = document.getElementById('medicationsList');
+            
+            if (appState.medications.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon"><i class="fas fa-prescription-bottle"></i></div>
+                            <h3>No medications yet</h3>
+                            <p>Start by adding your first medication to get reminders and track your intake.</p>
+                            <button class="btn btn-primary" onclick="openAddMedModal()">
+                                <i class="fas fa-plus"></i> Add Medication
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = appState.medications.map(med => `
+                <div class="medication-card" onclick="viewMedication(${med.id})">
+                    <div class="med-header">
+                        <div>
+                            <div class="med-name">${med.name}</div>
+                            <div class="med-dosage">${med.dosage}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="med-info">
+                        <div class="med-detail">
+                            <strong>Frequency</strong>
+                            ${getFrequencyLabel(med.frequency)}
+                        </div>
+                        <div class="med-detail">
+                            <strong>Times</strong>
+                            ${med.times.join(', ')}
+                        </div>
+                        ${med.reason ? `
+                        <div class="med-detail" style="grid-column: 1 / -1;">
+                            <strong>Reason</strong>
+                            ${med.reason}
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="med-actions">
+                        <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); editMedication(); viewMedication(${med.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); appState.currentEditId = ${med.id}; deleteMedication();">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderTodayReminders() {
+            const container = document.getElementById('todaysList');
+            const reminders = getTodayReminders();
+            
+            if (reminders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fas fa-check-circle"></i></div>
+                        <h3>No reminders today</h3>
+                        <p>You're all set! No medications scheduled for today.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = reminders.map(reminder => `
+                <div class="intake-item">
+                    <div class="intake-info">
+                        <div class="intake-med">${reminder.medication}</div>
+                        <div class="intake-time">
+                            <i class="fas fa-clock"></i> ${reminder.time}
+                        </div>
+                        <div class="intake-status">
+                            <span class="status-badge ${reminder.taken ? 'badge-taken' : 'badge-pending'}">
+                                ${reminder.taken ? '✓ Taken' : 'Pending'}
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn ${reminder.taken ? 'btn-secondary' : 'btn-success'}" 
+                            onclick="toggleIntakeTaken('${reminder.id}')">
+                        ${reminder.taken ? '<i class="fas fa-undo"></i> Mark Pending' : '<i class="fas fa-check"></i> Mark Taken'}
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            const sorted = [...appState.intakeHistory].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fas fa-history"></i></div>
+                        <h3>No history yet</h3>
+                        <p>Your medication intake history will appear here.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = sorted.map(intake => {
+                const date = new Date(intake.timestamp);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                return `
+                    <div class="intake-item">
+                        <div class="intake-info">
+                            <div class="intake-med">${intake.medication}</div>
+                            <div class="intake-time">
+                                <i class="fas fa-calendar"></i> ${dateStr}
+                            </div>
+                            <div class="intake-status">
+                                <span class="status-badge ${intake.taken ? 'badge-taken' : 'badge-pending'}">
+                                    ${intake.taken ? '✓ Taken' : 'Not taken'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderUpcomingReminders() {
+            const container = document.getElementById('upcomingReminders');
+            const reminders = getTodayReminders().slice(0, 5);
+            
+            if (reminders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fas fa-check-circle"></i></div>
+                        <p>No upcoming reminders today</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = reminders.map(reminder => `
+                <div class="intake-item">
+                    <div class="intake-info">
+                        <div class="intake-med">${reminder.medication}</div>
+                        <div class="intake-time">
+                            <i class="fas fa-clock"></i> ${reminder.time}
+                        </div>
+                    </div>
+                    <span class="status-badge ${reminder.taken ? 'badge-taken' : 'badge-pending'}">
+                        ${reminder.taken ? '✓ Taken' : 'Pending'}
+                    </span>
+                </div>
+            `).join('');
+        }
+        
+        // Helper Functions
+        function getTodayReminders() {
+            const today = new Date().toDateString();
+            const reminders = [];
+            
+            appState.medications.forEach(med => {
+                med.times.forEach(time => {
+                    const reminderId = `${med.id}-${time}`;
+                    const intake = appState.intakeHistory.find(i => 
+                        i.reminderId === reminderId && 
+                        new Date(i.timestamp).toDateString() === today
+                    );
+                    
+                    reminders.push({
+                        id: reminderId,
+                        medication: med.name,
+                        time: time,
+                        taken: intake ? intake.taken : false,
+                    });
+                });
+            });
+            
+            return reminders.sort((a, b) => a.time.localeCompare(b.time));
+        }
+        
+        function getTodayRemindersCount() {
+            let count = 0;
+            appState.medications.forEach(med => {
+                count += med.times.length;
+            });
+            return count;
+        }
+        
+        function getFrequencyLabel(freq) {
+            const labels = {
+                'once': 'Once daily',
+                'twice': 'Twice daily',
+                'thrice': 'Three times daily',
+                'custom': 'Custom',
+            };
+            return labels[freq] || freq;
+        }
+        
+        function toggleIntakeTaken(reminderId) {
+            const today = new Date().toDateString();
+            let intake = appState.intakeHistory.find(i => 
+                i.reminderId === reminderId && 
+                new Date(i.timestamp).toDateString() === today
+            );
+            
+            if (!intake) {
+                const [medId, time] = reminderId.split('-');
+                const med = appState.medications.find(m => m.id == medId);
+                
+                intake = {
+                    reminderId,
+                    medication: med.name,
+                    time,
+                    taken: true,
+                    timestamp: new Date().toISOString(),
+                };
+                appState.intakeHistory.push(intake);
+                showNotification('Medication marked as taken', 'success');
+            } else {
+                intake.taken = !intake.taken;
+                if (intake.taken) {
+                    showNotification('Medication marked as taken', 'success');
+                } else {
+                    showNotification('Marked as pending', 'info');
+                }
+            }
+            
+            saveToStorage();
+            renderTodayReminders();
+            renderDashboard();
+            renderHistory();
+        }
+        
+        function scheduleReminders() {
+            // Browser notifications for reminders
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const now = new Date();
+                const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                getTodayReminders().forEach(reminder => {
+                    const [hours, minutes] = reminder.time.split(':');
+                    const reminderDate = new Date();
+                    reminderDate.setHours(parseInt(hours), parseInt(minutes), 0);
+                    
+                    if (reminderDate > now && !reminder.taken) {
+                        const timeout = reminderDate.getTime() - now.getTime();
+                        setTimeout(() => {
+                            if ('Notification' in window) {
+                                new Notification('Medication Reminder', {
+                                    body: `Time to take ${reminder.medication} at ${reminder.time}`,
+                                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">💊</text></svg>',
+                                });
+                            }
+                        }, timeout);
+                    }
+                });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+        
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Storage Management
+        function saveToStorage() {
+            localStorage.setItem('medReminderApp', JSON.stringify(appState));
+        }
+        
+        function loadFromStorage() {
+            const data = localStorage.getItem('medReminderApp');
+            if (data) {
+                const parsed = JSON.parse(data);
+                appState.medications = parsed.medications || [];
+                appState.intakeHistory = parsed.intakeHistory || [];
+            }
+        }
+        
+        // Close modals on outside click
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'medModal') {
+                closeMedModal();
+            }
+            if (e.target.id === 'viewMedModal') {
+                closeViewMedModal();
+            }
+        });
+    </script>
+</body>
+</html>
